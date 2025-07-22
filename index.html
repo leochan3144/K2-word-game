@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <title>K2 認詞語遊戲</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      text-align: center;
+      padding: 20px;
+      margin: 0;
+      background-color: #FFF9E5;
+    }
+    h1 {
+      color: #FF8C00;
+      font-size: 6vw;
+    }
+    button {
+      font-size: 5vw;
+      padding: 1vw 2vw;
+      margin: 10px;
+      border-radius: 10px;
+      border: 2px solid #ccc;
+      background-color: #f0f0f0;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button:hover {
+      background-color: #ddd;
+    }
+    .options button {
+      width: 90%;
+      max-width: 400px;
+      display: block;
+      margin: 10px auto;
+    }
+    #feedback img {
+      width: 50vw;
+      max-width: 250px;
+      margin-top: 10px;
+    }
+    #feedback {
+      font-size: 5vw;
+      margin-top: 20px;
+    }
+    #nextBtn {
+      display: none;
+    }
+    @media (min-width: 768px) {
+      h1 { font-size: 36px; }
+      button { font-size: 24px; }
+      #feedback { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <h1>K2 認詞語遊戲</h1>
+  <button onclick="playAudio()">🔊 播放詞語</button>
+  <div class="options" id="options"></div>
+  <div id="feedback"></div>
+  <button id="nextBtn" onclick="nextQuestion()">下一題 ➡️</button>
+  <audio id="correctSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_6387cfd218.mp3?filename=success-fanfare-trumpets-6185.mp3"></audio>
+  <script>
+    const wordList = [
+      { word: "椅子", options: ["椅子", "桌子", "香蕉", "帽子"] },
+      { word: "蘋果", options: ["蘋果", "橙子", "氣球", "玩具"] },
+      { word: "鞋子", options: ["帽子", "褲子", "鞋子", "書包"] },
+      { word: "老師", options: ["學生", "老師", "家長", "朋友"] },
+      { word: "圖書", options: ["玩具", "圖書", "餐具", "積木"] },
+      { word: "巴士", options: ["巴士", "火車", "的士", "船隻"] },
+      { word: "太陽", options: ["月亮", "星星", "雲朵", "太陽"] },
+      { word: "滑梯", options: ["鞦韆", "滑梯", "樓梯", "斜路"] },
+      { word: "鉛筆", options: ["書本", "鉛筆", "橡皮", "剪刀"] },
+      { word: "水樽", options: ["飯盒", "水樽", "碗筷", "毛巾"] }
+    ];
+    const correctGif = "d867d869df8a48849e6b3aeca1fb74a0.gif";
+    const wrongGif = "ad4d53a006f048ce8889e0f3a14efbe1.gif";
+    let currentQuestion = 0;
+    let score = 0;
+    function playAudio() {
+      const msg = new SpeechSynthesisUtterance(wordList[currentQuestion].word);
+      msg.lang = 'zh-HK';
+      speechSynthesis.speak(msg);
+    }
+    function showQuestion() {
+      const q = wordList[currentQuestion];
+      const shuffled = q.options.sort(() => Math.random() - 0.5);
+      const optionsDiv = document.getElementById("options");
+      optionsDiv.innerHTML = "";
+      shuffled.forEach(option => {
+        const btn = document.createElement("button");
+        btn.innerText = option;
+        btn.onclick = () => checkAnswer(option);
+        optionsDiv.appendChild(btn);
+      });
+      document.getElementById("feedback").innerHTML = "";
+      document.getElementById("nextBtn").style.display = "none";
+    }
+    function checkAnswer(selected) {
+      const correct = wordList[currentQuestion].word;
+      const feedback = document.getElementById("feedback");
+      if (selected === correct) {
+        score++;
+        document.getElementById("correctSound").play();
+        feedback.innerHTML = `
+          🎉 <b>答對了！做得非常好！</b><br>
+          <img src="${correctGif}">
+        `;
+      } else {
+        feedback.innerHTML = `
+          ❌ <b>答錯了！不要灰心，繼續努力！</b><br>
+          <img src="${wrongGif}">
+        `;
+      }
+      document.getElementById("nextBtn").style.display = "inline-block";
+    }
+    function nextQuestion() {
+      currentQuestion++;
+      if (currentQuestion < 10) {
+        showQuestion();
+      } else {
+        endGame();
+      }
+    }
+    function endGame() {
+      const optionsDiv = document.getElementById("options");
+      const feedback = document.getElementById("feedback");
+      optionsDiv.innerHTML = "";
+      document.getElementById("nextBtn").style.display = "none";
+      if (score === 10) {
+        document.getElementById("correctSound").play();
+        feedback.innerHTML = `
+          🎊 <b>你答對了全部題目！真了不起！</b><br>
+          <img src="${correctGif}">
+        `;
+      } else {
+        feedback.innerHTML = `
+          👏 你總共答對了 ${score} 題！繼續加油！<br>
+          <img src="${correctGif}">
+        `;
+      }
+    }
+    showQuestion();
+  </script>
+</body>
+</html>
