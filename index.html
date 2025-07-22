@@ -58,6 +58,7 @@
   <h1>K2 認詞語遊戲</h1>
   <button onclick="playAudio()">🔊 播放詞語</button>
   <div class="options" id="options"></div>
+  <div id="score">得分：0 / 10</div>
   <div id="feedback"></div>
   <button id="nextBtn" onclick="nextQuestion()">下一題 ➡️</button>
   <audio id="correctSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_6387cfd218.mp3?filename=success-fanfare-trumpets-6185.mp3"></audio>
@@ -98,9 +99,12 @@
       document.getElementById("nextBtn").style.display = "none";
     }
     function checkAnswer(selected) {
+      document.getElementById("score").innerText = `得分：${score} / 10`;
       const correct = wordList[currentQuestion].word;
       const feedback = document.getElementById("feedback");
       if (selected === correct) {
+        score++;
+        document.getElementById("score").innerText = `得分：${score} / 10`;
         score++;
         document.getElementById("correctSound").play();
         feedback.innerHTML = `
@@ -131,7 +135,7 @@
       if (score === 10) {
         document.getElementById("correctSound").play();
         feedback.innerHTML = `
-          🎊 <b>你答對了全部題目！真了不起！</b><br>
+          🌟 <b>完美！你十題全對！太勁啦！</b><br>
           <img src="${correctGif}">
         `;
       } else {
