@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-HK">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>K2 認詞語遊戲</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
       font-family: 'Arial', sans-serif;
@@ -26,14 +26,32 @@
       cursor: pointer;
       transition: 0.2s;
     }
-    button:hover {
+    button:hover:not(:disabled) {
       background-color: #ddd;
+    }
+    button:disabled {
+      cursor: default;
+      opacity: 0.7;
     }
     .options button {
       width: 90%;
       max-width: 400px;
       display: block;
       margin: 10px auto;
+    }
+    /* 正確答案綠底 */
+    .correct {
+      background-color: #90ee90 !important; /* 淺綠 */
+      border-color: #008000 !important;
+      color: #006400;
+      font-weight: bold;
+    }
+    /* 錯誤答案紅底 */
+    .wrong {
+      background-color: #f08080 !important; /* 淺紅 */
+      border-color: #b22222 !important;
+      color: #8b0000;
+      font-weight: bold;
     }
     #feedback img {
       width: 50vw;
@@ -71,6 +89,7 @@
   <audio id="correctSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_6387cfd218.mp3?filename=success-fanfare-trumpets-6185.mp3"></audio>
 
   <script>
+    // 擴大詞庫範例
     const wordList = [
       { word: "椅子", options: ["椅子", "桌子", "香蕉", "帽子"] },
       { word: "蘋果", options: ["蘋果", "橙子", "氣球", "玩具"] },
@@ -81,7 +100,18 @@
       { word: "太陽", options: ["月亮", "星星", "雲朵", "太陽"] },
       { word: "滑梯", options: ["鞦韆", "滑梯", "樓梯", "斜路"] },
       { word: "鉛筆", options: ["書本", "鉛筆", "橡皮", "剪刀"] },
-      { word: "水樽", options: ["飯盒", "水樽", "碗筷", "毛巾"] }
+      { word: "水樽", options: ["飯盒", "水樽", "碗筷", "毛巾"] },
+      // 新增10個詞
+      { word: "蘭花", options: ["蘭花", "玫瑰", "菊花", "荷花"] },
+      { word: "火車", options: ["巴士", "的士", "火車", "飛機"] },
+      { word: "氣球", options: ["玩具", "氣球", "書包", "球"] },
+      { word: "電腦", options: ["電腦", "手機", "電視", "電話"] },
+      { word: "飯盒", options: ["飯盒", "水樽", "碗筷", "筷子"] },
+      { word: "老師", options: ["學生", "家長", "老師", "朋友"] },
+      { word: "星星", options: ["太陽", "月亮", "星星", "雲朵"] },
+      { word: "風扇", options: ["燈泡", "風扇", "空調", "電扇"] },
+      { word: "手套", options: ["帽子", "手套", "圍巾", "襪子"] },
+      { word: "書本", options: ["書本", "筆記", "紙張", "紙巾"] },
     ];
 
     // 小黃人GIF路徑（與本 HTML 同資料夾）
@@ -90,7 +120,12 @@
 
     let currentQuestion = 0;
     let score = 0;
-    const shuffledWordList = [...wordList].sort(() => Math.random() - 0.5); // 隨機題目順序
+    // 隨機抽10題
+    const shuffledWordList = shuffle(wordList).slice(0, 10);
+
+    function shuffle(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
 
     function playAudio() {
       const msg = new SpeechSynthesisUtterance(shuffledWordList[currentQuestion].word);
@@ -100,23 +135,39 @@
 
     function showQuestion() {
       const q = shuffledWordList[currentQuestion];
-      const shuffledOptions = [...q.options].sort(() => Math.random() - 0.5); // 隨機選項
+      const shuffledOptions = shuffle([...q.options]);
       const optionsDiv = document.getElementById("options");
       optionsDiv.innerHTML = "";
       shuffledOptions.forEach(option => {
         const btn = document.createElement("button");
         btn.innerText = option;
-        btn.onclick = () => checkAnswer(option);
+        btn.onclick = () => checkAnswer(option, btn);
         optionsDiv.appendChild(btn);
       });
       document.getElementById("feedback").innerHTML = "";
       document.getElementById("nextBtn").style.display = "none";
+
+      // 每題開始自動朗讀
+      playAudio();
     }
 
-    function checkAnswer(selected) {
-      const correct = shuffledWordList[currentQuestion].word;
+    function checkAnswer(selected, clickedBtn) {
+      const q = shuffledWordList[currentQuestion];
+      const correct = q.word;
       const feedback = document.getElementById("feedback");
       const scoreDisplay = document.getElementById("score");
+
+      // 禁用全部選項按鈕
+      const buttons = document.querySelectorAll("#options button");
+      buttons.forEach(btn => {
+        btn.disabled = true;
+        if (btn.innerText === correct) {
+          btn.classList.add("correct");
+        }
+        if (btn.innerText === selected && selected !== correct) {
+          btn.classList.add("wrong");
+        }
+      });
 
       if (selected === correct) {
         score++;
