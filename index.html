@@ -17,14 +17,12 @@
       font-size: 6vw;
     }
     button {
-      font-size: 5vw;
-      padding: 1vw 2vw;
-      margin: 10px;
       border-radius: 10px;
       border: 2px solid #ccc;
       background-color: #f0f0f0;
       cursor: pointer;
       transition: 0.2s;
+      font-weight: bold;
     }
     button:hover:not(:disabled) {
       background-color: #ddd;
@@ -33,25 +31,39 @@
       cursor: default;
       opacity: 0.7;
     }
-    .options button {
-      width: 90%;
+    .options {
+      margin: 20px auto;
+      width: 90vw;
       max-width: 400px;
-      display: block;
-      margin: 10px auto;
+      height: 50vw; /* 高度可調整 */
+      max-height: 220px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 12px;
+    }
+    .options button {
+      font-size: 7vw; /* 字體加大 */
+      padding: 0;
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
     }
     /* 正確答案綠底 */
     .correct {
       background-color: #90ee90 !important; /* 淺綠 */
       border-color: #008000 !important;
       color: #006400;
-      font-weight: bold;
     }
     /* 錯誤答案紅底 */
     .wrong {
       background-color: #f08080 !important; /* 淺紅 */
       border-color: #b22222 !important;
       color: #8b0000;
-      font-weight: bold;
     }
     #feedback img {
       width: 50vw;
@@ -69,11 +81,23 @@
     }
     #nextBtn {
       display: none;
+      font-size: 5vw;
+      padding: 1vw 3vw;
+      border-radius: 10px;
+      border: 2px solid #ccc;
+      background-color: #f0f0f0;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    #nextBtn:hover {
+      background-color: #ddd;
     }
     @media (min-width: 768px) {
       h1 { font-size: 36px; }
-      button { font-size: 24px; }
+      .options button { font-size: 28px; }
       #score, #feedback { font-size: 24px; }
+      #nextBtn { font-size: 24px; padding: 8px 24px; }
+      .options { height: 200px; max-width: 400px; }
     }
   </style>
 </head>
@@ -89,7 +113,6 @@
   <audio id="correctSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_6387cfd218.mp3?filename=success-fanfare-trumpets-6185.mp3"></audio>
 
   <script>
-    // 擴大詞庫範例
     const wordList = [
       { word: "椅子", options: ["椅子", "桌子", "香蕉", "帽子"] },
       { word: "蘋果", options: ["蘋果", "橙子", "氣球", "玩具"] },
@@ -101,7 +124,6 @@
       { word: "滑梯", options: ["鞦韆", "滑梯", "樓梯", "斜路"] },
       { word: "鉛筆", options: ["書本", "鉛筆", "橡皮", "剪刀"] },
       { word: "水樽", options: ["飯盒", "水樽", "碗筷", "毛巾"] },
-      // 新增10個詞
       { word: "蘭花", options: ["蘭花", "玫瑰", "菊花", "荷花"] },
       { word: "火車", options: ["巴士", "的士", "火車", "飛機"] },
       { word: "氣球", options: ["玩具", "氣球", "書包", "球"] },
@@ -114,13 +136,11 @@
       { word: "書本", options: ["書本", "筆記", "紙張", "紙巾"] },
     ];
 
-    // 小黃人GIF路徑（與本 HTML 同資料夾）
     const correctGif = "d867d869df8a48849e6b3aeca1fb74a0.gif";
     const wrongGif = "ad4d53a006f048ce8889e0f3a14efbe1.gif";
 
     let currentQuestion = 0;
     let score = 0;
-    // 隨機抽10題
     const shuffledWordList = shuffle(wordList).slice(0, 10);
 
     function shuffle(array) {
@@ -129,7 +149,7 @@
 
     function playAudio() {
       const msg = new SpeechSynthesisUtterance(shuffledWordList[currentQuestion].word);
-      msg.lang = 'zh-HK'; // 粵語
+      msg.lang = 'zh-HK';
       speechSynthesis.speak(msg);
     }
 
@@ -146,8 +166,6 @@
       });
       document.getElementById("feedback").innerHTML = "";
       document.getElementById("nextBtn").style.display = "none";
-
-      // 每題開始自動朗讀
       playAudio();
     }
 
@@ -157,7 +175,6 @@
       const feedback = document.getElementById("feedback");
       const scoreDisplay = document.getElementById("score");
 
-      // 禁用全部選項按鈕
       const buttons = document.querySelectorAll("#options button");
       buttons.forEach(btn => {
         btn.disabled = true;
