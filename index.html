@@ -83,10 +83,26 @@
       padding: 1vw 3vw;
       border-radius: 10px;
     }
+    .word-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 10px;
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
     .word-list button {
-      margin: 8px;
-      padding: 8px 16px;
-      font-size: 5vw;
+      margin: 0;
+      padding: 10px;
+      font-size: 16px;
+      min-height: 50px;
+    }
+    #practiceImage {
+      margin-top: 20px;
+    }
+    #practiceImage img {
+      max-width: 200px;
+      max-height: 200px;
     }
     @media (min-width: 768px) {
       h1 { font-size: 36px; }
@@ -147,6 +163,30 @@
       { word: "風扇", options: ["燈泡", "風扇", "空調", "電扇"] },
       { word: "手套", options: ["帽子", "手套", "圍巾", "襪子"] },
       { word: "書本", options: ["書本", "筆記", "紙張", "紙巾"] },
+    ];
+
+    // 所有詞語列表（80個）
+    const allWords = [
+      "椅子", "桌子", "香蕉", "帽子",
+      "蘋果", "橙子", "氣球", "玩具",
+      "帽子", "褲子", "鞋子", "書包",
+      "學生", "老師", "家長", "朋友",
+      "玩具", "圖書", "餐具", "積木",
+      "巴士", "火車", "的士", "船隻",
+      "月亮", "星星", "雲朵", "太陽",
+      "鞦韆", "滑梯", "樓梯", "斜路",
+      "書本", "鉛筆", "橡皮", "剪刀",
+      "飯盒", "水樽", "碗筷", "毛巾",
+      "蘭花", "玫瑰", "菊花", "荷花",
+      "巴士", "的士", "火車", "飛機",
+      "玩具", "氣球", "書包", "皮球",
+      "電腦", "手機", "電視", "電話",
+      "飯盒", "水樽", "碗筷", "筷子",
+      "學生", "家長", "老師", "朋友",
+      "太陽", "月亮", "星星", "雲朵",
+      "燈泡", "風扇", "空調", "電扇",
+      "帽子", "手套", "圍巾", "襪子",
+      "書本", "筆記", "紙張", "紙巾"
     ];
 
     const correctGif = "d867d869df8a48849e6b3aeca1fb74a0.gif";
@@ -247,12 +287,19 @@
       document.getElementById("practice").style.display = "block";
       const listDiv = document.getElementById("wordList");
       listDiv.innerHTML = "";
-      wordBank.forEach(item => {
+      
+      // 使用所有80個詞語創建練習按鈕
+      const uniqueWords = [...new Set(allWords)]; // 去除重複詞語
+      shuffle(uniqueWords).forEach(word => {
         const btn = document.createElement("button");
-        btn.innerText = item.word;
+        btn.innerText = word;
         btn.onclick = () => {
-          speak(item.word);
-          document.getElementById("practiceImage").innerHTML = `<p><img src="https://via.placeholder.com/200x150?text=${item.word}" alt="${item.word}"></p>`;
+          speak(word);
+          // 使用placeholder圖片，實際應用中可以替換為真實圖片
+          document.getElementById("practiceImage").innerHTML = `
+            <p><b>${word}</b></p>
+            <img src="https://via.placeholder.com/200x150?text=${word}" alt="${word}">
+          `;
         };
         listDiv.appendChild(btn);
       });
