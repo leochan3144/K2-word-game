@@ -5,104 +5,265 @@
   <title>K2 認詞語遊戲</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    body { font-family:Arial, sans-serif; text-align:center; padding:20px; margin:0; background:#FFF9E5; }
-    h1 { color:#FF8C00; font-size:6vw; }
-    button { border-radius:10px; border:2px solid #ccc; background:#f0f0f0; cursor:pointer; transition:0.2s; font-weight:bold; }
-    button:hover:not(:disabled) { background:#ddd; }
-    button:disabled { cursor:default; opacity:0.7; }
-    .word-list { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:20px; }
-    .word-list button { font-size:6vw; padding:6px 10px; }
-    .practice-display { margin-top:20px; }
-    .practice-display img { width:60vw; max-width:200px; height:auto; margin-top:10px; border:2px solid #ccc; border-radius:8px; }
-    @media(min-width:768px){ h1{font-size:36px;} .word-list button{font-size:28px;} }
+    body {
+      font-family: 'Arial', sans-serif;
+      text-align: center;
+      padding: 20px;
+      margin: 0;
+      background-color: #FFF9E5;
+    }
+    h1 {
+      color: #FF8C00;
+      font-size: 6vw;
+    }
+    button {
+      border-radius: 10px;
+      border: 2px solid #ccc;
+      background-color: #f0f0f0;
+      cursor: pointer;
+      transition: 0.2s;
+      font-weight: bold;
+    }
+    button:hover:not(:disabled) {
+      background-color: #ddd;
+    }
+    button:disabled {
+      cursor: default;
+      opacity: 0.7;
+    }
+    .options {
+      margin: 20px auto;
+      width: 90vw;
+      max-width: 400px;
+      height: 50vw;
+      max-height: 220px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 12px;
+    }
+    .options button {
+      font-size: 7vw;
+      padding: 0;
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+    .correct {
+      background-color: #90ee90 !important;
+      border-color: #008000 !important;
+      color: #006400;
+    }
+    .wrong {
+      background-color: #f08080 !important;
+      border-color: #b22222 !important;
+      color: #8b0000;
+    }
+    #feedback img {
+      width: 50vw;
+      max-width: 250px;
+      margin-top: 10px;
+    }
+    #score {
+      font-size: 5vw;
+      color: #008000;
+      margin-top: 10px;
+    }
+    #feedback {
+      font-size: 5vw;
+      margin-top: 20px;
+    }
+    #nextBtn {
+      display: none;
+      font-size: 5vw;
+      padding: 1vw 3vw;
+      border-radius: 10px;
+    }
+    .word-list button {
+      margin: 8px;
+      padding: 8px 16px;
+      font-size: 5vw;
+    }
+    @media (min-width: 768px) {
+      h1 { font-size: 36px; }
+      .options button { font-size: 28px; }
+      #score, #feedback { font-size: 24px; }
+      #nextBtn { font-size: 24px; padding: 8px 24px; }
+      .word-list button { font-size: 20px; }
+    }
   </style>
 </head>
 <body>
   <h1>K2 認詞語遊戲</h1>
 
+  <!-- 主選單 -->
   <div id="menu">
     <button onclick="startGameMode()">▶️ 遊戲模式</button>
     <button onclick="startPracticeMode()">📚 練習模式</button>
   </div>
 
+  <!-- 遊戲模式 -->
   <div id="game" style="display:none;">
-    <!-- 遊戲模式略（同之前版本） -->
+    <div id="score">得分：0 / 10</div>
+    <div class="options" id="options"></div>
+    <div id="feedback"></div>
+    <button id="nextBtn" onclick="nextQuestion()">下一題 ➡️</button>
     <button onclick="returnToMenu()">🔙 返回選單</button>
   </div>
 
+  <!-- 練習模式 -->
   <div id="practice" style="display:none;">
-    <div class="word-list" id="wordListButtons"></div>
-    <div class="practice-display" id="practiceDisplay">
-      <div id="practiceWord" style="font-size:5vw; color:#333; font-weight:bold;"></div>
-      <img id="practiceImg" src="" alt="" style="display:none;" />
-    </div>
+    <div class="word-list" id="wordList"></div>
+    <div id="practiceImage"></div>
     <button onclick="returnToMenu()">🔙 返回選單</button>
   </div>
 
-  <audio id="correctSound" src="..."></audio>
-  <script>
-    const practiceWords = [
-      ["椅子","桌子","香蕉","帽子"],
-      ["蘋果","橙子","氣球","玩具"],
-      ["帽子","褲子","鞋子","書包"],
-      ["學生","老師","家長","朋友"],
-      ["玩具","圖書","餐具","積木"],
-      ["巴士","火車","的士","船隻"],
-      ["月亮","星星","雲朵","太陽"],
-      ["鞦韆","滑梯","樓梯","斜路"],
-      ["書本","鉛筆","橡皮","剪刀"],
-      ["飯盒","水樽","碗筷","毛巾"],
-      ["蘭花","玫瑰","菊花","荷花"],
-      ["巴士","的士","火車","飛機"],
-      ["玩具","氣球","書包","球"],
-      ["電腦","手機","電視","電話"],
-      ["飯盒","水樽","碗筷","筷子"],
-      ["學生","家長","老師","朋友"],
-      ["太陽","月亮","星星","雲朵"],
-      ["燈泡","風扇","空調","電扇"],
-      ["帽子","手套","圍巾","襪子"],
-      ["書本","筆記","紙張","紙巾"]
-    ].flat();
+  <!-- 聲效 -->
+  <audio id="correctSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_6387cfd218.mp3?filename=success-fanfare-trumpets-6185.mp3"></audio>
 
-    function speak(text){
-      const msg=new SpeechSynthesisUtterance(text);
-      msg.lang='zh-HK';
-      speechSynthesis.cancel();
+  <script>
+    const wordBank = [
+      { word: "椅子", options: ["椅子", "桌子", "香蕉", "帽子"] },
+      { word: "蘋果", options: ["蘋果", "橙子", "氣球", "玩具"] },
+      { word: "鞋子", options: ["帽子", "褲子", "鞋子", "書包"] },
+      { word: "老師", options: ["學生", "老師", "家長", "朋友"] },
+      { word: "圖書", options: ["玩具", "圖書", "餐具", "積木"] },
+      { word: "巴士", options: ["巴士", "火車", "的士", "船隻"] },
+      { word: "太陽", options: ["月亮", "星星", "雲朵", "太陽"] },
+      { word: "滑梯", options: ["鞦韆", "滑梯", "樓梯", "斜路"] },
+      { word: "鉛筆", options: ["書本", "鉛筆", "橡皮", "剪刀"] },
+      { word: "水樽", options: ["飯盒", "水樽", "碗筷", "毛巾"] },
+      { word: "蘭花", options: ["蘭花", "玫瑰", "菊花", "荷花"] },
+      { word: "火車", options: ["巴士", "的士", "火車", "飛機"] },
+      { word: "氣球", options: ["玩具", "氣球", "書包", "球"] },
+      { word: "電腦", options: ["電腦", "手機", "電視", "電話"] },
+      { word: "飯盒", options: ["飯盒", "水樽", "碗筷", "筷子"] },
+      { word: "老師", options: ["學生", "家長", "老師", "朋友"] },
+      { word: "星星", options: ["太陽", "月亮", "星星", "雲朵"] },
+      { word: "風扇", options: ["燈泡", "風扇", "空調", "電扇"] },
+      { word: "手套", options: ["帽子", "手套", "圍巾", "襪子"] },
+      { word: "書本", options: ["書本", "筆記", "紙張", "紙巾"] },
+    ];
+
+    const correctGif = "https://media.giphy.com/media/d867d869df8a48849e6b3aeca1fb74a0/giphy.gif";
+    const wrongGif = "https://media.giphy.com/media/ad4d53a006f048ce8889e0f3a14efbe1/giphy.gif";
+
+    let currentQuestion = 0;
+    let score = 0;
+    let shuffledWordList = [];
+
+    function shuffle(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    function speak(text) {
+      const msg = new SpeechSynthesisUtterance(text);
+      msg.lang = 'zh-HK';
       speechSynthesis.speak(msg);
     }
 
-    function startPracticeMode(){
-      document.getElementById("menu").style.display='none';
-      document.getElementById("practice").style.display='block';
-      const div=document.getElementById("wordListButtons");
-      div.innerHTML='';
-      practiceWords.forEach(word=>{
-        const btn=document.createElement('button');
-        btn.innerText=word;
-        btn.onclick=()=>onWordClick(word);
-        div.appendChild(btn);
+    function startGameMode() {
+      document.getElementById("menu").style.display = "none";
+      document.getElementById("game").style.display = "block";
+      shuffledWordList = shuffle([...wordBank]).slice(0, 10);
+      currentQuestion = 0;
+      score = 0;
+      showQuestion();
+    }
+
+    function showQuestion() {
+      const q = shuffledWordList[currentQuestion];
+      const shuffledOptions = shuffle([...q.options]);
+      const optionsDiv = document.getElementById("options");
+      optionsDiv.innerHTML = "";
+      shuffledOptions.forEach(option => {
+        const btn = document.createElement("button");
+        btn.innerText = option;
+        btn.onclick = () => checkAnswer(option, btn);
+        optionsDiv.appendChild(btn);
+      });
+      document.getElementById("feedback").innerHTML = "";
+      document.getElementById("nextBtn").style.display = "none";
+      speak(q.word);
+    }
+
+    function checkAnswer(selected, btn) {
+      const correct = shuffledWordList[currentQuestion].word;
+      const feedback = document.getElementById("feedback");
+      const scoreDisplay = document.getElementById("score");
+      const buttons = document.querySelectorAll("#options button");
+      buttons.forEach(b => {
+        b.disabled = true;
+        if (b.innerText === correct) b.classList.add("correct");
+        if (b.innerText === selected && selected !== correct) {
+          b.classList.add("wrong");
+        }
+      });
+
+      if (selected === correct) {
+        score++;
+        document.getElementById("correctSound").play();
+        feedback.innerHTML = `🎉 <b>答對了！做得非常好！</b><br><img src="${correctGif}">`;
+        speak("答對了！做得非常好！");
+      } else {
+        feedback.innerHTML = `❌ <b>答錯了！不要灰心，繼續努力！</b><br><img src="${wrongGif}">`;
+        speak(`這個選項是「${selected}」，不正確喔`);
+      }
+
+      scoreDisplay.innerText = `得分：${score} / 10`;
+      document.getElementById("nextBtn").style.display = "inline-block";
+    }
+
+    function nextQuestion() {
+      currentQuestion++;
+      if (currentQuestion < 10) {
+        showQuestion();
+      } else {
+        endGame();
+      }
+    }
+
+    function endGame() {
+      const feedback = document.getElementById("feedback");
+      const optionsDiv = document.getElementById("options");
+      document.getElementById("nextBtn").style.display = "none";
+      optionsDiv.innerHTML = "";
+
+      if (score === 10) {
+        feedback.innerHTML = `🌟 <b>完美！你十題全對！太勁啦！</b><br><img src="${correctGif}">`;
+        speak("完美！你十題全對！太勁啦！");
+      } else {
+        feedback.innerHTML = `👏 你總共答對了 ${score} 題！繼續加油！<br><img src="${correctGif}">`;
+        speak(`你總共答對了 ${score} 題，繼續加油！`);
+      }
+    }
+
+    function startPracticeMode() {
+      document.getElementById("menu").style.display = "none";
+      document.getElementById("practice").style.display = "block";
+      const listDiv = document.getElementById("wordList");
+      listDiv.innerHTML = "";
+      wordBank.forEach(item => {
+        const btn = document.createElement("button");
+        btn.innerText = item.word;
+        btn.onclick = () => {
+          speak(item.word);
+          document.getElementById("practiceImage").innerHTML = `<p><img src="https://via.placeholder.com/200x150?text=${item.word}" alt="${item.word}"></p>`;
+        };
+        listDiv.appendChild(btn);
       });
     }
 
-    function onWordClick(word){
-      speak(word);
-      document.getElementById('practiceWord').innerText=word;
-      const img=document.getElementById('practiceImg');
-      // 預設路徑：img/詞語.png（可根據實際替換）
-      img.src=`img/${word}.png`;
-      img.alt=word;
-      img.onerror=function(){
-        img.style.display='none';
-      };
-      img.onload=function(){
-        img.style.display='block';
-      };
-    }
-
-    function returnToMenu(){
-      speechSynthesis.cancel();
-      document.getElementById("menu").style.display='block';
-      document.getElementById("practice").style.display='none';
+    function returnToMenu() {
+      document.getElementById("game").style.display = "none";
+      document.getElementById("practice").style.display = "none";
+      document.getElementById("menu").style.display = "block";
+      document.getElementById("feedback").innerHTML = "";
+      document.getElementById("practiceImage").innerHTML = "";
     }
   </script>
 </body>
