@@ -35,7 +35,7 @@
       margin: 20px auto;
       width: 90vw;
       max-width: 400px;
-      height: 50vw; /* 高度可調整 */
+      height: 50vw;
       max-height: 220px;
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -43,7 +43,7 @@
       gap: 12px;
     }
     .options button {
-      font-size: 7vw; /* 字體加大 */
+      font-size: 7vw;
       padding: 0;
       margin: 0;
       width: 100%;
@@ -53,15 +53,13 @@
       justify-content: center;
       user-select: none;
     }
-    /* 正確答案綠底 */
     .correct {
-      background-color: #90ee90 !important; /* 淺綠 */
+      background-color: #90ee90 !important;
       border-color: #008000 !important;
       color: #006400;
     }
-    /* 錯誤答案紅底 */
     .wrong {
-      background-color: #f08080 !important; /* 淺紅 */
+      background-color: #f08080 !important;
       border-color: #b22222 !important;
       color: #8b0000;
     }
@@ -79,7 +77,7 @@
       font-size: 5vw;
       margin-top: 20px;
     }
-    #nextBtn {
+    #nextBtn, #backBtn {
       display: none;
       font-size: 5vw;
       padding: 1vw 3vw;
@@ -89,27 +87,54 @@
       cursor: pointer;
       transition: 0.2s;
     }
-    #nextBtn:hover {
+    #nextBtn:hover, #backBtn:hover {
       background-color: #ddd;
+    }
+    #menu {
+      display: block;
+    }
+    .word-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .word-list button {
+      font-size: 6vw;
+      padding: 10px 20px;
     }
     @media (min-width: 768px) {
       h1 { font-size: 36px; }
-      .options button { font-size: 28px; }
+      .options button, .word-list button { font-size: 28px; }
       #score, #feedback { font-size: 24px; }
-      #nextBtn { font-size: 24px; padding: 8px 24px; }
+      #nextBtn, #backBtn { font-size: 24px; padding: 8px 24px; }
       .options { height: 200px; max-width: 400px; }
     }
   </style>
 </head>
 <body>
   <h1>K2 認詞語遊戲</h1>
-  <button onclick="playAudio()">🔊 播放詞語</button>
-  <div id="score">得分：0 / 10</div>
-  <div class="options" id="options"></div>
-  <div id="feedback"></div>
-  <button id="nextBtn" onclick="nextQuestion()">下一題 ➡️</button>
 
-  <!-- 聲效 -->
+  <div id="menu">
+    <button onclick="startGameMode()">▶️ 遊戲模式</button>
+    <button onclick="startPracticeMode()">📚 練習模式</button>
+  </div>
+
+  <div id="game" style="display:none;">
+    <button onclick="playAudio()">🔊 播放詞語</button>
+    <div id="score">得分：0 / 10</div>
+    <div class="options" id="options"></div>
+    <div id="feedback"></div>
+    <button id="nextBtn" onclick="nextQuestion()">下一題 ➡️</button>
+    <button id="backBtn" onclick="returnToMenu()">🔙 返回選單</button>
+  </div>
+
+  <div id="practice" style="display:none;">
+    <div class="word-list" id="wordListButtons"></div>
+    <button onclick="returnToMenu()">🔙 返回選單</button>
+  </div>
+
   <audio id="correctSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_6387cfd218.mp3?filename=success-fanfare-trumpets-6185.mp3"></audio>
 
   <script>
@@ -141,16 +166,20 @@
 
     let currentQuestion = 0;
     let score = 0;
-    const shuffledWordList = shuffle(wordList).slice(0, 10);
+    let shuffledWordList = [];
 
     function shuffle(array) {
       return array.sort(() => Math.random() - 0.5);
     }
 
-    function playAudio() {
-      const msg = new SpeechSynthesisUtterance(shuffledWordList[currentQuestion].word);
+    function speak(text) {
+      const msg = new SpeechSynthesisUtterance(text);
       msg.lang = 'zh-HK';
       speechSynthesis.speak(msg);
+    }
+
+    function playAudio() {
+      speak(shuffledWordList[currentQuestion].word);
     }
 
     function showQuestion() {
@@ -189,15 +218,11 @@
       if (selected === correct) {
         score++;
         document.getElementById("correctSound").play();
-        feedback.innerHTML = `
-          🎉 <b>答對了！做得非常好！</b><br>
-          <img src="${correctGif}">
-        `;
+        feedback.innerHTML = `🎉 <b>答對了！做得非常好！</b><br><img src="${correctGif}">`;
+        speak("答對了！做得非常好！");
       } else {
-        feedback.innerHTML = `
-          ❌ <b>答錯了！不要灰心，繼續努力！</b><br>
-          <img src="${wrongGif}">
-        `;
+        feedback.innerHTML = `❌ <b>答錯了！不要灰心，繼續努力！</b><br><img src="${wrongGif}">`;
+        speak("答錯了！不要灰心，繼續努力！");
       }
 
       scoreDisplay.innerText = `得分：${score} / 10`;
@@ -219,24 +244,48 @@
       const scoreDisplay = document.getElementById("score");
       optionsDiv.innerHTML = "";
       document.getElementById("nextBtn").style.display = "none";
-
       if (score === 10) {
         document.getElementById("correctSound").play();
-        feedback.innerHTML = `
-          🌟 <b>完美！你十題全對！太勁啦！</b><br>
-          <img src="${correctGif}">
-        `;
+        feedback.innerHTML = `🌟 <b>完美！你十題全對！太勁啦！</b><br><img src="${correctGif}">`;
+        speak("完美！你十題全對！");
       } else {
-        feedback.innerHTML = `
-          👏 你總共答對了 ${score} 題！繼續加油！<br>
-          <img src="${correctGif}">
-        `;
+        feedback.innerHTML = `👏 你總共答對了 ${score} 題！繼續加油！<br><img src="${correctGif}">`;
+        speak(`你總共答對了 ${score} 題！繼續加油！`);
       }
-
       scoreDisplay.innerText = `得分：${score} / 10`;
     }
 
-    showQuestion();
+    function startGameMode() {
+      shuffledWordList = shuffle(wordList).slice(0, 10);
+      currentQuestion = 0;
+      score = 0;
+      document.getElementById("menu").style.display = "none";
+      document.getElementById("game").style.display = "block";
+      document.getElementById("practice").style.display = "none";
+      document.getElementById("backBtn").style.display = "inline-block";
+      showQuestion();
+    }
+
+    function startPracticeMode() {
+      document.getElementById("menu").style.display = "none";
+      document.getElementById("game").style.display = "none";
+      document.getElementById("practice").style.display = "block";
+      const wordListDiv = document.getElementById("wordListButtons");
+      wordListDiv.innerHTML = "";
+      wordList.forEach(item => {
+        const btn = document.createElement("button");
+        btn.innerText = item.word;
+        btn.onclick = () => speak(item.word);
+        wordListDiv.appendChild(btn);
+      });
+    }
+
+    function returnToMenu() {
+      speechSynthesis.cancel();
+      document.getElementById("menu").style.display = "block";
+      document.getElementById("game").style.display = "none";
+      document.getElementById("practice").style.display = "none";
+    }
   </script>
 </body>
 </html>
